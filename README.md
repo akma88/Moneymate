@@ -1,17 +1,23 @@
-# moneymate
+# MoneyMate
 
-A new Flutter project.
+Учебный пример четырёх способов управления состоянием:
 
-## Getting Started
+- `setState()` — локальное состояние форм: тип операции, категория, дата, время и видимость пароля (`lib/add_transaction_screen.dart`, `lib/registration_screen.dart`).
+- `InheritedWidget` — `AppSettings` передаёт формат валюты дочерним экранам; `of(context)` подписывает их на изменения (`lib/app_settings.dart`).
+- `ScopedModel` — `UserModel` хранит имя пользователя и обновляет приветствие через `notifyListeners()` (`lib/models/user_model.dart`).
+- `Provider` — `TransactionsModel` хранит операции и вычисляет баланс; `context.watch` обновляет экран, `context.read` добавляет операцию (`lib/models/transactions_model.dart`).
 
-This project is a starting point for a Flutter application.
+Общие модели подключены над `MaterialApp` в `lib/main.dart`, поэтому доступны всем маршрутам. Данные хранятся в памяти на время работы приложения.
 
-A few resources to get you started if this is your first Flutter project:
+Запуск: `flutter pub get`, затем `flutter run`.
+Проверки: `flutter analyze` и `flutter test`.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Настройки
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Кнопка шестерёнки на главном экране открывает настройки:
+
+- Валюта: USD, KZT, EUR, RUB. Меняется обозначение всех сумм без конвертации по курсу.
+- Тема: системная, светлая, тёмная.
+- Язык: English, Русский, Қазақша. Переводятся экраны, категории, сообщения проверки и системные диалоги даты/времени. Пользовательские названия операций не переводятся.
+
+`SettingsModel` сохраняет выбор через `SharedPreferences`; `AppSettings` передаёт язык и валюту через `InheritedWidget`. Настройки восстанавливаются до запуска интерфейса. Операции и имя пользователя по-прежнему хранятся только в памяти.

@@ -1,7 +1,13 @@
+import 'settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'registration_screen.dart';
 import 'add_transaction_screen.dart';
 import 'models/transaction.dart';
+import 'package:provider/provider.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'app_settings.dart';
+import 'models/transactions_model.dart';
+import 'models/user_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,48 +17,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Transaction> _transactions = [];
-
-  String? _userName;
-
-  double get _totalIncome {
-    double total = 0;
-
-    for (final transaction in _transactions) {
-      if (transaction.isIncome) {
-        total += transaction.amount;
-      }
-    }
-
-    return total;
-  }
-
-  double get _totalExpenses {
-    double total = 0;
-
-    for (final transaction in _transactions) {
-      if (!transaction.isIncome) {
-        total += transaction.amount;
-      }
-    }
-
-    return total;
-  }
-
-  double get _balance {
-    return _totalIncome - _totalExpenses;
-  }
-
   Future<void> _openRegistration() async {
     final name = await Navigator.push<String>(
       context,
       MaterialPageRoute(builder: (context) => const RegistrationScreen()),
     );
 
+    if (!mounted) return;
     if (name != null) {
-      setState(() {
-        _userName = name;
-      });
+      ScopedModel.of<UserModel>(context).register(name);
     }
   }
 
@@ -62,72 +35,83 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
     );
 
+    if (!mounted) return;
     if (transaction != null) {
-      setState(() {
-        _transactions.add(transaction);
-      });
+      context.read<TransactionsModel>().add(transaction);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final finances = context.watch<TransactionsModel>();
+    final transactions = finances.transactions;
+    final userName = ScopedModel.of<UserModel>(
+      context,
+      rebuildOnChange: true,
+    ).name;
+    final settings = AppSettings.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F8F6),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
 
-        title: const Text(
+        title: Text(
           'MoneyMate',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
 
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Color(0xFF1F2937),
+            tooltip: settings.text('Settings'),
+            onPressed: () => Navigator.push<void>(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
             Text(
-              _userName == null
-                  ? 'Good morning 👋'
-                  : 'Good morning, $_userName 👋',
+              settings.greeting(userName),
 
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF6B7280),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
-            if (_userName == null)
-              const Text(
-                'Not registered yet?',
-                style: TextStyle(fontSize: 15, color: Color(0xFF9CA3AF)),
+            if (userName == null)
+              Text(
+                AppSettings.of(context).text('Not registered yet?'),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
 
-            if (_userName == null) const SizedBox(height: 15),
+            if (userName == null) SizedBox(height: 15),
 
-            if (_userName == null)
+            if (userName == null)
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -136,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: _openRegistration,
 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D60),
+                    backgroundColor: Color(0xFF2E7D60),
                     foregroundColor: Colors.white,
 
                     shape: RoundedRectangleBorder(
@@ -144,21 +128,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  child: const Text(
-                    'Create an account',
+                  child: Text(
+                    AppSettings.of(context).text('Create an account'),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
 
-            const SizedBox(height: 25),
+            SizedBox(height: 25),
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24),
 
               decoration: BoxDecoration(
-                color: const Color(0xFF2E7D60),
+                color: Color(0xFF2E7D60),
                 borderRadius: BorderRadius.circular(24),
               ),
 
@@ -166,51 +150,51 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  const Text(
-                    'Total Balance',
+                  Text(
+                    AppSettings.of(context).text('Total Balance'),
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   Text(
-                    '\$${_balance.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    settings.formatMoney(finances.balance),
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
-                  const Text(
-                    'Current balance',
+                  Text(
+                    AppSettings.of(context).text('Current balance'),
                     style: TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             Row(
               children: [
                 Expanded(
                   child: _moneyCard(
-                    title: 'Income',
-                    amount: '\$${_totalIncome.toStringAsFixed(2)}',
+                    title: AppSettings.of(context).text('Income'),
+                    amount: settings.formatMoney(finances.totalIncome),
                     icon: Icons.arrow_downward,
                     iconColor: Colors.green,
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
 
                 Expanded(
                   child: _moneyCard(
-                    title: 'Expenses',
-                    amount: '\$${_totalExpenses.toStringAsFixed(2)}',
+                    title: AppSettings.of(context).text('Expenses'),
+                    amount: settings.formatMoney(finances.totalExpenses),
                     icon: Icons.arrow_upward,
                     iconColor: Colors.red,
                   ),
@@ -218,26 +202,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
-            const SizedBox(height: 28),
+            SizedBox(height: 28),
 
-            const Text(
-              'Recent Transactions',
+            Text(
+              AppSettings.of(context).text('Recent Transactions'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
-            if (_transactions.isEmpty)
+            if (transactions.isEmpty)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(30),
+                padding: EdgeInsets.all(30),
 
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(18),
                 ),
 
-                child: const Column(
+                child: Column(
                   children: [
                     Icon(
                       Icons.receipt_long_outlined,
@@ -248,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: 12),
 
                     Text(
-                      'No transactions yet',
+                      AppSettings.of(context).text('No transactions yet'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -258,7 +242,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: 5),
 
                     Text(
-                      'Tap + to add your first transaction',
+                      AppSettings.of(
+                        context,
+                      ).text('Tap + to add your first transaction'),
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -267,12 +253,12 @@ class _HomeScreenState extends State<HomeScreen> {
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
 
-                itemCount: _transactions.length,
+                itemCount: transactions.length,
 
                 itemBuilder: (context, index) {
-                  final transaction = _transactions[index];
+                  final transaction = transactions[index];
 
                   return _transactionItem(transaction);
                 },
@@ -282,12 +268,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF2E7D60),
+        backgroundColor: Color(0xFF2E7D60),
         foregroundColor: Colors.white,
 
         onPressed: _addTransaction,
 
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -299,10 +285,10 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color iconColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -311,25 +297,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8),
 
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
 
             child: Icon(icon, color: iconColor, size: 20),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
-          Text(title, style: const TextStyle(color: Color(0xFF6B7280))),
+          Text(
+            title,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
 
           Text(
             amount,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -339,64 +330,71 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _transactionItem(Transaction transaction) {
     final bool isIncome = transaction.isIncome;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+    final date = transaction.date;
+    final formattedDate =
+        '${date.day.toString().padLeft(2, '0')}.'
+        '${date.month.toString().padLeft(2, '0')}.'
+        '${date.year}';
 
+    final formattedTime =
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
-
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isIncome
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.red.withOpacity(0.1),
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-
             child: Icon(
               isIncome ? Icons.arrow_downward : Icons.arrow_upward,
               color: isIncome ? Colors.green : Colors.red,
             ),
           ),
-
-          const SizedBox(width: 12),
-
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 Text(
                   transaction.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
-
-                const SizedBox(height: 4),
-
+                SizedBox(height: 4),
                 Text(
-                  transaction.category,
-                  style: const TextStyle(
-                    color: Color(0xFF9CA3AF),
+                  AppSettings.of(context).text(transaction.category),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13,
                   ),
+                ),
+                SizedBox(height: 5),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 4,
+                  children: [
+                    _transactionDateTime(Icons.calendar_today, formattedDate),
+                    _transactionDateTime(Icons.access_time, formattedTime),
+                  ],
                 ),
               ],
             ),
           ),
-
+          SizedBox(width: 5),
           Text(
-            '${isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
-
+            '${isIncome ? '+' : '-'}'
+            '${AppSettings.of(context).formatMoney(transaction.amount)}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: isIncome ? Colors.green : Colors.red,
@@ -404,6 +402,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _transactionDateTime(IconData icon, String value) {
+    final color = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: color),
+        const SizedBox(width: 4),
+        Text(value, style: TextStyle(color: color, fontSize: 12)),
+      ],
     );
   }
 }

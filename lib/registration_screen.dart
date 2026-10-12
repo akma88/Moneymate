@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'app_settings.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -38,11 +38,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
 
           child: Form(
             key: _formKey,
@@ -50,7 +50,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 Center(
                   child: Container(
@@ -58,11 +58,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     height: 75,
 
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2E7D60),
+                      color: Color(0xFF2E7D60),
                       borderRadius: BorderRadius.circular(22),
                     ),
 
-                    child: const Icon(
+                    child: Icon(
                       Icons.account_balance_wallet_outlined,
                       color: Colors.white,
                       size: 40,
@@ -70,50 +70,57 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                SizedBox(height: 25),
 
-                const Center(
+                Center(
                   child: Text(
-                    'Create your account',
+                    AppSettings.of(context).text('Create your account'),
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
-                const Center(
+                Center(
                   child: Text(
-                    'Start managing your money with MoneyMate',
+                    AppSettings.of(
+                      context,
+                    ).text('Start managing your money with MoneyMate'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 35),
+                SizedBox(height: 35),
 
-                const Text(
-                  'Full Name',
+                Text(
+                  AppSettings.of(context).text('Full Name'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 TextFormField(
                   controller: _nameController,
 
                   decoration: InputDecoration(
-                    hintText: 'Enter your name',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    hintText: AppSettings.of(context).text('Enter your name'),
+                    prefixIcon: Icon(Icons.person_outline),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLow,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -122,7 +129,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         color: Color(0xFF2E7D60),
                         width: 2,
                       ),
@@ -131,29 +138,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your name';
+                      return AppSettings.of(
+                        context,
+                      ).text('Please enter your name');
                     }
 
                     if (value.trim().length < 2) {
-                      return 'Name must contain at least 2 characters';
+                      return AppSettings.of(
+                        context,
+                      ).text('Name must contain at least 2 characters');
                     }
 
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                const Text(
-                  'Email',
+                Text(
+                  AppSettings.of(context).text('Email'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 TextFormField(
                   controller: _emailController,
@@ -162,9 +173,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                   decoration: InputDecoration(
                     hintText: 'example@email.com',
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    prefixIcon: Icon(Icons.email_outlined),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLow,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -173,7 +186,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         color: Color(0xFF2E7D60),
                         width: 2,
                       ),
@@ -182,29 +195,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email';
+                      return AppSettings.of(
+                        context,
+                      ).text('Please enter your email');
                     }
 
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return AppSettings.of(
+                        context,
+                      ).text('Please enter a valid email');
                     }
 
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                const Text(
-                  'Password',
+                Text(
+                  AppSettings.of(context).text('Password'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 TextFormField(
                   controller: _passwordController,
@@ -212,9 +229,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   obscureText: _hidePassword,
 
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: AppSettings.of(
+                      context,
+                    ).text('Enter your password'),
 
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline),
 
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -231,7 +250,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
 
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLow,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -240,7 +261,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         color: Color(0xFF2E7D60),
                         width: 2,
                       ),
@@ -249,29 +270,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return AppSettings.of(
+                        context,
+                      ).text('Please enter a password');
                     }
 
                     if (value.length < 6) {
-                      return 'Password must contain at least 6 characters';
+                      return AppSettings.of(
+                        context,
+                      ).text('Password must contain at least 6 characters');
                     }
 
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                const Text(
-                  'Confirm Password',
+                Text(
+                  AppSettings.of(context).text('Confirm Password'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 TextFormField(
                   controller: _confirmPasswordController,
@@ -279,9 +304,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   obscureText: _hideConfirmPassword,
 
                   decoration: InputDecoration(
-                    hintText: 'Repeat your password',
+                    hintText: AppSettings.of(
+                      context,
+                    ).text('Repeat your password'),
 
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline),
 
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -298,7 +325,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
 
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLow,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -307,7 +336,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         color: Color(0xFF2E7D60),
                         width: 2,
                       ),
@@ -316,18 +345,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return AppSettings.of(
+                        context,
+                      ).text('Please confirm your password');
                     }
 
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return AppSettings.of(
+                        context,
+                      ).text('Passwords do not match');
                     }
 
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 SizedBox(
                   width: double.infinity,
@@ -337,7 +370,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     onPressed: _register,
 
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E7D60),
+                      backgroundColor: Color(0xFF2E7D60),
                       foregroundColor: Colors.white,
 
                       shape: RoundedRectangleBorder(
@@ -345,8 +378,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
 
-                    child: const Text(
-                      'Create Account',
+                    child: Text(
+                      AppSettings.of(context).text('Create Account'),
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -355,17 +388,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                const Center(
+                Center(
                   child: Text(
-                    'By creating an account, you agree to use MoneyMate responsibly.',
+                    AppSettings.of(context).text(
+                      'By creating an account, you agree to use MoneyMate responsibly.',
+                    ),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
               ],
             ),
           ),

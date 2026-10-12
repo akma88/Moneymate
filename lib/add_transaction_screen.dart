@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_settings.dart';
 import 'models/transaction.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -10,13 +11,14 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
 
   bool _isIncome = false;
-
   String _selectedCategory = 'Food';
+
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
 
   final List<String> _categories = [
     'Food',
@@ -36,6 +38,49 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.dispose();
   }
 
+  Future<void> _pickDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (!mounted) return;
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        );
+      });
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+
+    if (!mounted) return;
+    if (pickedTime != null) {
+      setState(() {
+        _selectedTime = pickedTime;
+        _selectedDate = DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      });
+    }
+  }
+
   void _saveTransaction() {
     if (_formKey.currentState!.validate()) {
       final transaction = Transaction(
@@ -43,7 +88,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         amount: double.parse(_amountController.text),
         category: _selectedCategory,
         isIncome: _isIncome,
-        date: DateTime.now(),
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        ),
       );
 
       Navigator.pop(context, transaction);
@@ -53,60 +104,55 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8F6),
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F8F6),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text(
-          'Add Transaction',
+        title: Text(
+          AppSettings.of(context).text('Add Transaction'),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
-
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-
+        padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Add a new transaction',
+              Text(
+                AppSettings.of(context).text('Add a new transaction'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F2937),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-
-              const SizedBox(height: 6),
-
-              const Text(
-                'Enter the details of your transaction',
-                style: TextStyle(color: Color(0xFF6B7280)),
+              SizedBox(height: 6),
+              Text(
+                AppSettings.of(
+                  context,
+                ).text('Enter the details of your transaction'),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
+              SizedBox(height: 25),
 
-              const SizedBox(height: 25),
-
-              const Text(
-                'Transaction Type',
+              Text(
+                AppSettings.of(context).text('Transaction Type'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 12),
-
+              SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
                     child: ChoiceChip(
-                      label: const Text('Expense'),
+                      label: Text(AppSettings.of(context).text('Expense')),
                       selected: !_isIncome,
                       onSelected: (value) {
                         setState(() {
@@ -115,12 +161,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       },
                     ),
                   ),
-
-                  const SizedBox(width: 12),
-
+                  SizedBox(width: 12),
                   Expanded(
                     child: ChoiceChip(
-                      label: const Text('Income'),
+                      label: Text(AppSettings.of(context).text('Income')),
                       selected: _isIncome,
                       onSelected: (value) {
                         setState(() {
@@ -132,22 +176,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ],
               ),
 
-              const SizedBox(height: 25),
-
-              const Text(
-                'Title',
+              SizedBox(height: 25),
+              Text(
+                AppSettings.of(context).text('Title'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 8),
-
+              SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  hintText: 'Example: Lunch',
-                  prefixIcon: const Icon(Icons.edit_outlined),
+                  hintText: AppSettings.of(context).text('Example: Lunch'),
+                  prefixIcon: Icon(Icons.edit_outlined),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
@@ -155,36 +196,32 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title';
+                    return AppSettings.of(context).text('Please enter a title');
                   }
-
                   if (value.trim().length < 2) {
-                    return 'Title must contain at least 2 characters';
+                    return AppSettings.of(
+                      context,
+                    ).text('Title must contain at least 2 characters');
                   }
-
                   return null;
                 },
               ),
 
-              const SizedBox(height: 20),
-
-              const Text(
-                'Amount',
+              SizedBox(height: 20),
+              Text(
+                AppSettings.of(context).text('Amount'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 8),
-
+              SizedBox(height: 8),
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  hintText: 'Example: 25.50',
-                  prefixIcon: const Icon(Icons.attach_money),
+                  hintText: AppSettings.of(context).text('Example: 25.50'),
+                  prefixText: '${AppSettings.of(context).currencySymbol} ',
+                  prefixIcon: Icon(Icons.attach_money),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
@@ -192,83 +229,140 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an amount';
+                    return AppSettings.of(
+                      context,
+                    ).text('Please enter an amount');
                   }
-
                   final amount = double.tryParse(value);
-
                   if (amount == null) {
-                    return 'Please enter a valid number';
+                    return AppSettings.of(
+                      context,
+                    ).text('Please enter a valid number');
                   }
-
                   if (amount <= 0) {
-                    return 'Amount must be greater than 0';
+                    return AppSettings.of(
+                      context,
+                    ).text('Amount must be greater than 0');
                   }
-
                   return null;
                 },
               ),
 
-              const SizedBox(height: 20),
-
-              const Text(
-                'Category',
+              SizedBox(height: 20),
+              Text(
+                AppSettings.of(context).text('Category'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 8),
-
+              SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
-
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.category_outlined),
+                  prefixIcon: Icon(Icons.category_outlined),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
                   ),
                 ),
-
                 items: _categories.map((category) {
                   return DropdownMenuItem<String>(
                     value: category,
-                    child: Text(category),
+                    child: Text(AppSettings.of(context).text(category)),
                   );
                 }).toList(),
-
                 onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value!;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  }
                 },
               ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: 20),
+              Text(
+                AppSettings.of(context).text('Date'),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              _dateTimeField(
+                icon: Icons.calendar_month,
+                value:
+                    '${_selectedDate.day.toString().padLeft(2, '0')}.'
+                    '${_selectedDate.month.toString().padLeft(2, '0')}.'
+                    '${_selectedDate.year}',
+                onTap: _pickDate,
+              ),
 
+              SizedBox(height: 20),
+              Text(
+                AppSettings.of(context).text('Time'),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              _dateTimeField(
+                icon: Icons.access_time,
+                value: _selectedTime.format(context),
+                onTap: _pickTime,
+              ),
+
+              SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
                   onPressed: _saveTransaction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D60),
+                    backgroundColor: Color(0xFF2E7D60),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'Save Transaction',
+                  child: Text(
+                    AppSettings.of(context).text('Save Transaction'),
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dateTimeField({
+    required IconData icon,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 17),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Color(0xFF2E7D60)),
+            SizedBox(width: 12),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            Spacer(),
+            Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+          ],
         ),
       ),
     );
