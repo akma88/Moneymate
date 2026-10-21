@@ -1,3 +1,8 @@
+import 'history_screen.dart';
+import 'statistics_screen.dart';
+import 'budget_screen.dart';
+import 'profile_screen.dart';
+import 'models/budget_model.dart';
 import 'settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'registration_screen.dart';
@@ -18,15 +23,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openRegistration() async {
-    final name = await Navigator.push<String>(
+    await Navigator.push<void>(
       context,
-      MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+      MaterialPageRoute(builder: (_) => const RegistrationScreen()),
     );
-
-    if (!mounted) return;
-    if (name != null) {
-      ScopedModel.of<UserModel>(context).register(name);
-    }
   }
 
   Future<void> _addTransaction() async {
@@ -37,243 +37,372 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (!mounted) return;
     if (transaction != null) {
-      context.read<TransactionsModel>().add(transaction);
+      try {
+        await context.read<TransactionsModel>().add(transaction);
+      } catch (_) {
+        _showSaveError();
+      }
     }
+  }
+
+  void _showSaveError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppSettings.of(context).text('Could not save. Please try again.'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editTransaction(Transaction original) async {
+    final replacement = await Navigator.push<Transaction>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddTransactionScreen(transaction: original),
+      ),
+    );
+    if (!mounted || replacement == null) return;
+    try {
+      await context.read<TransactionsModel>().update(original, replacement);
+    } catch (_) {
+      _showSaveError();
+    }
+  }
+
+  Future<void> _deleteTransaction(Transaction transaction) async {
+    final settings = AppSettings.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(settings.text('Delete transaction?')),
+        content: Text(transaction.title),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(settings.text('Cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(settings.text('Delete')),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    try {
+      await context.read<TransactionsModel>().remove(transaction);
+    } catch (_) {
+      _showSaveError();
+    }
+  }
+
+  // Navigator opens a screen; Provider rebuilds this page when data changes.
+  void _openScreen(Widget screen) {
+    Navigator.push<void>(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
     final finances = context.watch<TransactionsModel>();
-    final transactions = finances.transactions;
+    final transactions = finances.transactions.take(5).toList();
+    final settings = AppSettings.of(context);
+    final colors = Theme.of(context).colorScheme;
     final userName = ScopedModel.of<UserModel>(
       context,
       rebuildOnChange: true,
     ).name;
-    final settings = AppSettings.of(context);
+    final now = DateTime.now();
+    final month = DateTime(now.year, now.month);
+    final limit = context.watch<BudgetModel>().limitFor(month);
+    final spent = finances.expensesFor(month);
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-
-        title: Text(
-          'MoneyMate',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        title: const Row(
+          children: [
+            Icon(Icons.account_balance_wallet_rounded, size: 26),
+            SizedBox(width: 10),
+            Text('MoneyMate'),
+          ],
         ),
-
         actions: [
           IconButton(
             tooltip: settings.text('Settings'),
-            onPressed: () => Navigator.push<void>(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
-            icon: Icon(
-              Icons.settings_outlined,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            onPressed: () => _openScreen(const SettingsScreen()),
+            icon: const Icon(Icons.settings_outlined),
           ),
+          const SizedBox(width: 8),
         ],
       ),
-
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [
-            Text(
-              settings.greeting(userName),
-
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-
-            SizedBox(height: 8),
-
-            if (userName == null)
-              Text(
-                AppSettings.of(context).text('Not registered yet?'),
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-
-            if (userName == null) SizedBox(height: 15),
-
-            if (userName == null)
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-
-                child: ElevatedButton(
-                  onPressed: _openRegistration,
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2E7D60),
-                    foregroundColor: Colors.white,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-
-                  child: Text(
-                    AppSettings.of(context).text('Create an account'),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-
-            SizedBox(height: 25),
-
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(24),
-
-              decoration: BoxDecoration(
-                color: Color(0xFF2E7D60),
-                borderRadius: BorderRadius.circular(24),
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-
-                children: [
-                  Text(
-                    AppSettings.of(context).text('Total Balance'),
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    settings.formatMoney(finances.balance),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    AppSettings.of(context).text('Current balance'),
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 20),
-
-            Row(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _moneyCard(
-                    title: AppSettings.of(context).text('Income'),
-                    amount: settings.formatMoney(finances.totalIncome),
-                    icon: Icons.arrow_downward,
-                    iconColor: Colors.green,
+                Text(
+                  settings.greeting(userName),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-
-                SizedBox(width: 12),
-
-                Expanded(
-                  child: _moneyCard(
-                    title: AppSettings.of(context).text('Expenses'),
-                    amount: settings.formatMoney(finances.totalExpenses),
-                    icon: Icons.arrow_upward,
-                    iconColor: Colors.red,
-                  ),
+                const SizedBox(height: 6),
+                Text(
+                  settings.text('Your money, at a glance'),
+                  style: TextStyle(color: colors.onSurfaceVariant),
                 ),
-              ],
-            ),
-
-            SizedBox(height: 28),
-
-            Text(
-              AppSettings.of(context).text('Recent Transactions'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            SizedBox(height: 12),
-
-            if (transactions.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(30),
-
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.receipt_long_outlined,
-                      size: 50,
-                      color: Colors.grey,
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF153E35), Color(0xFF28705A)],
                     ),
-
-                    SizedBox(height: 12),
-
-                    Text(
-                      AppSettings.of(context).text('No transactions yet'),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              settings.text('Total Balance'),
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.account_balance_wallet_outlined,
+                            color: Color(0xFFD7EF9C),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          settings.formatMoney(finances.balance),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 38,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.circle,
+                            size: 7,
+                            color: Color(0xFFD7EF9C),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              settings.text('Current balance'),
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          const Text(
+                            'MONEY / MATE',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _moneyCard(
+                        title: settings.text('Income'),
+                        amount: settings.formatMoney(finances.totalIncome),
+                        icon: Icons.south_west_rounded,
+                        color: const Color(0xFF287D62),
                       ),
                     ),
-
-                    SizedBox(height: 5),
-
-                    Text(
-                      AppSettings.of(
-                        context,
-                      ).text('Tap + to add your first transaction'),
-                      style: TextStyle(color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _moneyCard(
+                        title: settings.text('Expenses'),
+                        amount: settings.formatMoney(finances.totalExpenses),
+                        icon: Icons.north_east_rounded,
+                        color: const Color(0xFFC56949),
+                      ),
                     ),
                   ],
                 ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-
-                itemCount: transactions.length,
-
-                itemBuilder: (context, index) {
-                  final transaction = transactions[index];
-
-                  return _transactionItem(transaction);
-                },
-              ),
-          ],
+                const SizedBox(height: 20),
+                Card(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(22),
+                    onTap: () => _openScreen(const BudgetScreen()),
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.savings_outlined,
+                                color: colors.primary,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  settings.text('Monthly budget'),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            limit == null
+                                ? settings.text('Set a budget for this month')
+                                : '${settings.text(spent > limit ? 'Over budget' : 'Remaining')}: ${settings.formatMoney((limit - spent).abs())}',
+                            style: TextStyle(color: colors.onSurfaceVariant),
+                          ),
+                          if (limit != null) ...[
+                            const SizedBox(height: 14),
+                            LinearProgressIndicator(
+                              value: (spent / limit).clamp(0.0, 1.0),
+                              minHeight: 7,
+                              borderRadius: BorderRadius.circular(8),
+                              color: spent > limit
+                                  ? colors.error
+                                  : colors.primary,
+                              backgroundColor: colors.surfaceContainerHighest,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 26),
+                Text(
+                  settings.text('Recent Transactions'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => _openScreen(const HistoryScreen()),
+                    child: Text(settings.text('View all transactions')),
+                  ),
+                ),
+                if (transactions.isEmpty)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(28),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: colors.primaryContainer,
+                            child: Icon(
+                              Icons.receipt_long_outlined,
+                              color: colors.onPrimaryContainer,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            settings.text('No transactions yet'),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            settings.text(
+                              'Tap + to add your first transaction',
+                            ),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colors.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  for (final transaction in transactions)
+                    _transactionItem(transaction),
+                if (userName == null) ...[
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: _openRegistration,
+                    icon: const Icon(Icons.person_add_outlined),
+                    label: Text(settings.text('Create a profile')),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF2E7D60),
-        foregroundColor: Colors.white,
-
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: 0,
+        onDestinationSelected: (index) {
+          if (index == 0) return;
+          final screens = [
+            const HomeScreen(),
+            const HistoryScreen(),
+            const StatisticsScreen(),
+            const BudgetScreen(),
+            const ProfileScreen(),
+          ];
+          _openScreen(screens[index]);
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: settings.text('Home'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.receipt_long_outlined),
+            label: settings.text('History'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.pie_chart_outline),
+            label: settings.text('Statistics'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.savings_outlined),
+            label: settings.text('Budget'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            label: settings.text('Profile'),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _addTransaction,
-
-        child: Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: Text(settings.text('Add Transaction')),
       ),
     );
   }
@@ -282,138 +411,112 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required String amount,
     required IconData icon,
-    required Color iconColor,
+    required Color color,
   }) {
-    return Container(
-      padding: EdgeInsets.all(16),
-
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: color.withValues(alpha: 0.12),
+              child: Icon(icon, color: color, size: 20),
             ),
-
-            child: Icon(icon, color: iconColor, size: 20),
-          ),
-
-          SizedBox(height: 12),
-
-          Text(
-            title,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(height: 14),
+            Text(
+              title,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-
-          SizedBox(height: 4),
-
-          Text(
-            amount,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                amount,
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _transactionItem(Transaction transaction) {
-    final bool isIncome = transaction.isIncome;
-
+    final settings = AppSettings.of(context);
+    final color = transaction.isIncome
+        ? const Color(0xFF287D62)
+        : const Color(0xFFC56949);
     final date = transaction.date;
-    final formattedDate =
-        '${date.day.toString().padLeft(2, '0')}.'
-        '${date.month.toString().padLeft(2, '0')}.'
-        '${date.year}';
-
-    final formattedTime =
-        '${date.hour.toString().padLeft(2, '0')}:'
-        '${date.minute.toString().padLeft(2, '0')}';
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isIncome
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 4, 14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withValues(alpha: 0.12),
+              child: Icon(
+                transaction.isIncome
+                    ? Icons.south_west_rounded
+                    : Icons.north_east_rounded,
+                color: color,
+              ),
             ),
-            child: Icon(
-              isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isIncome ? Colors.green : Colors.red,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.title,
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  AppSettings.of(context).text(transaction.category),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 13,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${settings.text(transaction.category)} · ${date.day}.${date.month}.${date.year}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${transaction.isIncome ? '+' : '-'}${settings.formatMoney(transaction.amount)}',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuButton<String>(
+              tooltip: settings.text('Transaction actions'),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _editTransaction(transaction);
+                } else {
+                  _deleteTransaction(transaction);
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Text(settings.text('Edit')),
                 ),
-                SizedBox(height: 5),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 4,
-                  children: [
-                    _transactionDateTime(Icons.calendar_today, formattedDate),
-                    _transactionDateTime(Icons.access_time, formattedTime),
-                  ],
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(settings.text('Delete')),
                 ),
               ],
             ),
-          ),
-          SizedBox(width: 5),
-          Text(
-            '${isIncome ? '+' : '-'}'
-            '${AppSettings.of(context).formatMoney(transaction.amount)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isIncome ? Colors.green : Colors.red,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _transactionDateTime(IconData icon, String value) {
-    final color = Theme.of(context).colorScheme.onSurfaceVariant;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12, color: color),
-        const SizedBox(width: 4),
-        Text(value, style: TextStyle(color: color, fontSize: 12)),
-      ],
     );
   }
 }

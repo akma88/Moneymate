@@ -3,7 +3,9 @@ import 'app_settings.dart';
 import 'models/transaction.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  const AddTransactionScreen({super.key, this.transaction});
+
+  final Transaction? transaction;
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -30,6 +32,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Education',
     'Other',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final transaction = widget.transaction;
+    if (transaction != null) {
+      _titleController.text = transaction.title;
+      _amountController.text = transaction.amount.toString();
+      _isIncome = transaction.isIncome;
+      _selectedCategory = transaction.category;
+      _selectedDate = transaction.date;
+      _selectedTime = TimeOfDay.fromDateTime(transaction.date);
+    }
+  }
 
   @override
   void dispose() {
@@ -85,7 +101,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (_formKey.currentState!.validate()) {
       final transaction = Transaction(
         title: _titleController.text.trim(),
-        amount: double.parse(_amountController.text),
+        amount: double.parse(
+          _amountController.text.trim().replaceAll(',', '.'),
+        ),
         category: _selectedCategory,
         isIncome: _isIncome,
         date: DateTime(
@@ -109,7 +127,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
-          AppSettings.of(context).text('Add Transaction'),
+          AppSettings.of(context).text(
+            widget.transaction == null ? 'Add Transaction' : 'Edit Transaction',
+          ),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -233,8 +253,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       context,
                     ).text('Please enter an amount');
                   }
-                  final amount = double.tryParse(value);
-                  if (amount == null) {
+                  final amount = double.tryParse(
+                    value.trim().replaceAll(',', '.'),
+                  );
+                  if (amount == null || !amount.isFinite) {
                     return AppSettings.of(
                       context,
                     ).text('Please enter a valid number');
