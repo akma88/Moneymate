@@ -1,3 +1,4 @@
+import 'app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -183,8 +184,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         ? Icons.south_west
                                         : Icons.north_east,
                                     color: item.isIncome
-                                        ? Colors.green
-                                        : Colors.red,
+                                        ? AppTheme.income(context)
+                                        : AppTheme.expense(context),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
@@ -222,8 +223,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: item.isIncome
-                                      ? Colors.green
-                                      : Colors.red,
+                                      ? AppTheme.income(context)
+                                      : AppTheme.expense(context),
                                 ),
                               ),
                             ],

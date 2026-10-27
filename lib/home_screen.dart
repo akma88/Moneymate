@@ -1,3 +1,5 @@
+import 'app_theme.dart';
+import 'widgets/coin_mascot.dart';
 import 'history_screen.dart';
 import 'statistics_screen.dart';
 import 'budget_screen.dart';
@@ -120,12 +122,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.account_balance_wallet_rounded, size: 26),
-            SizedBox(width: 10),
-            Text('MoneyMate'),
-          ],
+        toolbarHeight: 64,
+        title: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ColoredBox(
+            color: AppTheme.cream,
+            child: Image.asset(
+              'assets/images/moneymate-logo-pop.png',
+              width: 210,
+              height: 56,
+              fit: BoxFit.contain,
+              semanticLabel: 'MoneyMate',
+            ),
+          ),
         ),
         actions: [
           IconButton(
@@ -148,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   settings.greeting(userName),
                   style: const TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -163,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF153E35), Color(0xFF28705A)],
+                      colors: [AppTheme.violet, Color(0xFF8B5CEB)],
                     ),
                     borderRadius: BorderRadius.circular(28),
                   ),
@@ -178,10 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: const TextStyle(color: Colors.white70),
                             ),
                           ),
-                          const Icon(
-                            Icons.account_balance_wallet_outlined,
-                            color: Color(0xFFD7EF9C),
-                          ),
+                          const CoinMascot(size: 48),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -192,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 38,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
                             letterSpacing: -1,
                           ),
                         ),
@@ -203,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Icon(
                             Icons.circle,
                             size: 7,
-                            color: Color(0xFFD7EF9C),
+                            color: AppTheme.coral,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -233,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: settings.text('Income'),
                         amount: settings.formatMoney(finances.totalIncome),
                         icon: Icons.south_west_rounded,
-                        color: const Color(0xFF287D62),
+                        color: AppTheme.income(context),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -242,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: settings.text('Expenses'),
                         amount: settings.formatMoney(finances.totalExpenses),
                         icon: Icons.north_east_rounded,
-                        color: const Color(0xFFC56949),
+                        color: AppTheme.expense(context),
                       ),
                     ),
                   ],
@@ -268,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Text(
                                   settings.text('Monthly budget'),
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),
@@ -304,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   settings.text('Recent Transactions'),
                   style: const TextStyle(
                     fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Align(
@@ -320,19 +326,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(28),
                       child: Column(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: colors.primaryContainer,
-                            child: Icon(
-                              Icons.receipt_long_outlined,
-                              color: colors.onPrimaryContainer,
-                              size: 28,
-                            ),
-                          ),
+                          const CoinMascot(size: 72),
                           const SizedBox(height: 16),
                           Text(
                             settings.text('No transactions yet'),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -414,6 +412,10 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
   }) {
     return Card(
+      color: Color.alphaBlend(
+        color.withValues(alpha: 0.08),
+        Theme.of(context).cardTheme.color!,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -438,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 amount,
                 style: const TextStyle(
                   fontSize: 21,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -451,8 +453,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _transactionItem(Transaction transaction) {
     final settings = AppSettings.of(context);
     final color = transaction.isIncome
-        ? const Color(0xFF287D62)
-        : const Color(0xFFC56949);
+        ? AppTheme.income(context)
+        : AppTheme.expense(context);
     final date = transaction.date;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -489,7 +491,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 6),
                   Text(
                     '${transaction.isIncome ? '+' : '-'}${settings.formatMoney(transaction.amount)}',
-                    style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: color, fontWeight: FontWeight.w800),
                   ),
                 ],
               ),

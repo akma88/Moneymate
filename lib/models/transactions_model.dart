@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'transaction.dart';
 
-/// Provider owns the shared transaction list and notifies the dashboard.
+
 class TransactionsModel extends ChangeNotifier {
   TransactionsModel([this._preferences]) {
     for (final entry
@@ -13,9 +13,9 @@ class TransactionsModel extends ChangeNotifier {
           Transaction.fromJson(jsonDecode(entry) as Map<String, dynamic>),
         );
       } on FormatException {
-        // Keep valid entries if a saved entry is damaged.
+       
       } on TypeError {
-        // Older or malformed entries must not prevent startup.
+        
       }
     }
   }
@@ -30,7 +30,7 @@ class TransactionsModel extends ChangeNotifier {
   double get totalExpenses => _total(false);
   double get balance => totalIncome - totalExpenses;
 
-  // Add only the matching type: income (true) or expense (false).
+  
   double _total(bool isIncome) {
     double total = 0;
     for (final transaction in _transactions) {

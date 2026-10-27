@@ -12,7 +12,7 @@ class UserModel extends Model {
         _email = data['email'] as String?;
         _active = data['active'] as bool? ?? false;
       } on FormatException {
-        // A damaged profile can be recreated without losing operations.
+       
       } on TypeError {
         _name = null;
         _email = null;

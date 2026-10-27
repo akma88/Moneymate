@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'app_settings.dart';
 import 'models/user_model.dart';
+import 'widgets/coin_mascot.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -62,7 +63,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            const Icon(Icons.account_circle_outlined, size: 80),
+            const Center(child: CoinMascot(size: 96)),
             const SizedBox(height: 24),
             TextFormField(
               key: const ValueKey('profile-name'),

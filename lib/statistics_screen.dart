@@ -14,14 +14,14 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> {
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   static const colors = [
-    Color(0xFF2E7D60),
-    Color(0xFF407FC1),
-    Color(0xFFE8A838),
-    Color(0xFFC75665),
-    Color(0xFF8462B6),
-    Color(0xFF298B94),
-    Color(0xFFB76F3B),
-    Color(0xFF697687),
+    Color(0xFF6337D9),
+    Color(0xFFFF8066),
+    Color(0xFFE6B94F),
+    Color(0xFFBC66AE),
+    Color(0xFF9476E3),
+    Color(0xFF54A8AE),
+    Color(0xFFCA7350),
+    Color(0xFF817491),
   ];
 
   @override

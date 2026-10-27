@@ -3,6 +3,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'app_settings.dart';
 import 'models/user_model.dart';
 import 'registration_screen.dart';
+import 'widgets/coin_mascot.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -16,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Icon(Icons.account_circle_outlined, size: 88),
+          const Center(child: CoinMascot(size: 104)),
           const SizedBox(height: 24),
           if (user.isSignedIn) ...[
             ListTile(
