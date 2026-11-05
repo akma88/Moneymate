@@ -7,9 +7,11 @@ class AppSettings extends InheritedWidget {
     super.key,
     this.currencySymbol = r'$',
     this.languageCode = 'en',
+    this.hideAmounts = false,
     required super.child,
   });
 
+  final bool hideAmounts;
   final String currencySymbol;
   final String languageCode;
 
@@ -27,10 +29,11 @@ class AppSettings extends InheritedWidget {
   }
 
   String formatMoney(double amount) =>
-      '$currencySymbol${amount.toStringAsFixed(2)}';
+      hideAmounts ? '••••' : '$currencySymbol${amount.toStringAsFixed(2)}';
 
   @override
   bool updateShouldNotify(AppSettings oldWidget) =>
+      hideAmounts != oldWidget.hideAmounts ||
       currencySymbol != oldWidget.currencySymbol ||
       languageCode != oldWidget.languageCode;
 }

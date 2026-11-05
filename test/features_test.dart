@@ -105,6 +105,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Lunch'), findsOneWidget);
     expect(find.text('Taxi'), findsNothing);
+    await tester.tap(find.text('Statistics'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('History'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const ValueKey('history-search')))
+          .controller!
+          .text,
+      'lunch',
+    );
+    expect(find.text('Taxi'), findsNothing);
     await tester.tap(find.text('Reset filters'));
     await tester.pumpAndSettle();
     expect(find.text('Taxi'), findsOneWidget);
@@ -137,7 +149,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Over budget'), findsOneWidget);
     expect(find.text(r'$25.00'), findsOneWidget);
-    await tester.tap(find.byType(BackButton));
+    await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Statistics'));
     await tester.pumpAndSettle();
@@ -177,6 +189,12 @@ void main() {
       await tester.tap(find.text('Save profile'));
       await tester.pumpAndSettle();
       expect(find.text('test@example.com'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Sign out'),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out').last);

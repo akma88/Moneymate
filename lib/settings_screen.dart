@@ -6,6 +6,25 @@ import 'models/settings_model.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  Future<void> _save(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppSettings.of(context).text('Could not save. Please try again.'),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsModel>();
@@ -32,7 +51,9 @@ class SettingsScreen extends StatelessWidget {
                 )
                 .toList(),
             onChanged: (value) {
-              if (value != null) settings.setCurrency(value);
+              if (value != null) {
+                _save(context, () => settings.setCurrency(value));
+              }
             },
           ),
           const SizedBox(height: 12),
@@ -65,7 +86,9 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
             onChanged: (value) {
-              if (value != null) settings.setTheme(value);
+              if (value != null) {
+                _save(context, () => settings.setTheme(value));
+              }
             },
           ),
           const SizedBox(height: 24),
@@ -86,7 +109,9 @@ class SettingsScreen extends StatelessWidget {
                 )
                 .toList(),
             onChanged: (value) {
-              if (value != null) settings.setLanguage(value);
+              if (value != null) {
+                _save(context, () => settings.setLanguage(value));
+              }
             },
           ),
         ],

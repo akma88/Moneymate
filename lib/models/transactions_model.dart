@@ -93,6 +93,8 @@ class TransactionsModel extends ChangeNotifier {
     return [..._transactions, transaction];
   });
 
+  Future<void> clear() => _change(() => <Transaction>[]);
+
   Future<void> remove(Transaction transaction) =>
       _change(() => [..._transactions]..remove(transaction));
 

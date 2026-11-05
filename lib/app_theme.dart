@@ -4,10 +4,12 @@ class AppTheme {
   static const violet = Color(0xFF6337D9);
   static const coral = Color(0xFFFF8066);
   static const ink = Color(0xFF291447);
-  static const cream = Color(0xFFFFF8F4);
+  static const cream = Color(0xFFF7F7FB);
 
   static Color income(BuildContext context) =>
-      Theme.of(context).colorScheme.primary;
+      Theme.of(context).brightness == Brightness.dark
+      ? const Color(0xFF75DFC1)
+      : const Color(0xFF147D64);
   static Color expense(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
       ? const Color(0xFFFFAB96)
@@ -101,7 +103,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: dark ? const Color(0xFF2C203E) : Colors.white,
-        indicatorColor: scheme.secondaryContainer,
+        indicatorColor: scheme.primaryContainer,
         elevation: 0,
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
@@ -112,8 +114,8 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: coral,
-        foregroundColor: ink,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
         elevation: 2,
         shape: rounded,
         extendedTextStyle: const TextStyle(fontWeight: FontWeight.w800),
@@ -122,6 +124,10 @@ class AppTheme {
         shape: rounded,
         side: BorderSide.none,
         selectedColor: scheme.primaryContainer,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       dividerTheme: DividerThemeData(
         color: scheme.primary.withValues(alpha: 0.12),

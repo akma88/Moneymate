@@ -76,7 +76,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(find.text('Profile'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('currency-USD')));
     await tester.pumpAndSettle();
@@ -97,6 +101,8 @@ void main() {
     expect(find.text('Настройки'), findsOneWidget);
     expect(find.text('Валюта'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Главная'));
     await tester.pumpAndSettle();
     expect(find.text('Доброе утро, Aruzhan 👋'), findsOneWidget);
     expect(find.text('₸100.00'), findsNWidgets(2));

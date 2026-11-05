@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_settings.dart';
+import 'widgets/privacy_cover.dart';
 import 'app_theme.dart';
 import 'home_screen.dart';
 import 'models/settings_model.dart';
@@ -44,6 +45,7 @@ class _MoneyMateAppState extends State<MoneyMateApp> {
         model: _user,
         child: Consumer<SettingsModel>(
           builder: (context, settings, child) => AppSettings(
+            hideAmounts: settings.hideAmounts,
             currencySymbol: settings.currencySymbol,
             languageCode: settings.language,
             child: MaterialApp(
@@ -59,6 +61,8 @@ class _MoneyMateAppState extends State<MoneyMateApp> {
                 Locale('kk'),
               ],
               localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              builder: (context, child) =>
+                  PrivacyCover(enabled: settings.privacyScreen, child: child!),
               home: const HomeScreen(),
             ),
           ),

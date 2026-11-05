@@ -4,6 +4,8 @@ import 'package:scoped_model/scoped_model.dart';
 
 class UserModel extends Model {
   UserModel([this._preferences]) {
+    final avatar = _preferences?.getString('profile_avatar');
+    if (avatars.containsKey(avatar)) _avatar = avatar;
     final profile = _preferences?.getString('user_profile');
     if (profile != null) {
       try {
@@ -12,7 +14,6 @@ class UserModel extends Model {
         _email = data['email'] as String?;
         _active = data['active'] as bool? ?? false;
       } on FormatException {
-       
       } on TypeError {
         _name = null;
         _email = null;
@@ -21,6 +22,31 @@ class UserModel extends Model {
       _name = _preferences?.getString('user_name');
       _active = _name != null;
     }
+  }
+
+  static const avatars = {
+    'Cat': '🐱',
+    'Fox': '🦊',
+    'Panda': '🐼',
+    'Koala': '🐨',
+    'Lion': '🦁',
+    'Penguin': '🐧',
+    'Unicorn': '🦄',
+    'Robot': '🤖',
+  };
+  String? _avatar;
+  String? get avatar => _avatar;
+
+  Future<void> setAvatar(String? value) async {
+    if (value != null && !avatars.containsKey(value)) {
+      throw ArgumentError.value(value, 'avatar');
+    }
+    final saved = value == null
+        ? await _preferences?.remove('profile_avatar')
+        : await _preferences?.setString('profile_avatar', value);
+    if (saved == false) throw StateError('Could not save avatar');
+    _avatar = value;
+    notifyListeners();
   }
 
   final SharedPreferences? _preferences;

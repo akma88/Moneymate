@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_theme.dart';
 
-/// A decorative companion that echoes the smiling coin in the brand mark.
+
 class CoinMascot extends StatelessWidget {
   const CoinMascot({super.key, this.size = 80});
   final double size;

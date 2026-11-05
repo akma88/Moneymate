@@ -167,7 +167,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: items.isEmpty
                 ? Center(child: Text(s.text('No matching transactions')))
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];

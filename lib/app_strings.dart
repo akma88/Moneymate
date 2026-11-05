@@ -1,6 +1,55 @@
 // App-owned labels; stored transaction categories remain language independent.
 const appTranslations = <String, Map<String, String>>{
   "ru": {
+    "Show amounts": "Показать суммы",
+    "Change avatar": "Изменить аватар",
+    "Choose your avatar": "Выберите аватар",
+    "A little more you": "Добавьте немного индивидуальности",
+    "Use default avatar": "Стандартный аватар",
+    "Cat": "Кот",
+    "Fox": "Лиса",
+    "Panda": "Панда",
+    "Koala": "Коала",
+    "Lion": "Лев",
+    "Penguin": "Пингвин",
+    "Unicorn": "Единорог",
+    "Robot": "Робот",
+    "Security & privacy": "Безопасность и приватность",
+    "Your finances are hidden": "Финансы скрыты",
+    "Privacy on your terms": "Управляйте приватностью",
+    "This is a local profile, without a password or biometric lock. Use your device lock to restrict access.":
+        "Это локальный профиль без пароля и биометрии. Для ограничения доступа используйте блокировку устройства.",
+    "Hide amounts": "Скрывать суммы",
+    "Mask financial totals throughout the app. Entry fields and exports still show amounts.":
+        "Скрывает суммы в приложении. В полях ввода и экспорте суммы остаются видны.",
+    "Cover app in background": "Скрывать экран в фоне",
+    "Show a privacy cover when the app becomes inactive. This does not block screenshots or lock the app.":
+        "Скрывает содержимое, когда приложение неактивно. Не блокирует скриншоты и вход в приложение.",
+    "Data stays on this device": "Данные на этом устройстве",
+    "No cloud sync or verified account. Local storage is not an encrypted vault. Removing the app may remove its data.":
+        "Нет облачной синхронизации и подтверждённого аккаунта. Локальное хранилище не является зашифрованным сейфом. При удалении приложения данные могут исчезнуть.",
+    "Export transactions": "Экспорт операций",
+    "Copies all transaction details, including amounts, to your clipboard. Profile and budget are not included. Keep the copy somewhere private.":
+        "Копирует все операции, включая суммы, в буфер обмена. Профиль и бюджет не включены. Сохраните копию в безопасном месте.",
+    "Copy JSON": "Копировать JSON",
+    "Transactions copied": "Операции скопированы",
+    "Delete all transactions?": "Удалить все операции?",
+    "This permanently removes all transactions from this device. Your profile, settings and budgets stay. Export your transactions first if you need a copy.":
+        "Все операции на этом устройстве будут удалены безвозвратно. Профиль, настройки и бюджеты сохранятся. Если нужна копия, сначала экспортируйте операции.",
+    "Delete all": "Удалить всё",
+    "Transactions deleted": "Операции удалены",
+    "Your data": "Ваши данные",
+    "Transactions on this device": "Операций на устройстве",
+    "Copy a JSON record of your transactions": "Копия операций в формате JSON",
+    "This export is for keeping a record. Import is not supported yet.":
+        "Экспорт позволяет сохранить записи. Импорт пока не поддерживается.",
+    "Delete all transactions": "Удалить все операции",
+    "This action cannot be undone": "Это действие нельзя отменить",
+    "Make it yours": "Ваш личный MoneyMate",
+    "Preferences & data": "Настройки и данные",
+    "Amount visibility and background cover": "Видимость сумм и экран в фоне",
+    "Export and manage your transactions": "Экспорт и управление операциями",
+    "Spending overview": "Обзор расходов",
     "Your money, at a glance": "Всё о ваших деньгах — в одном месте",
     "Home": "Главная",
     "History": "История",
@@ -121,6 +170,57 @@ const appTranslations = <String, Map<String, String>>{
         "Создавая аккаунт, вы соглашаетесь ответственно использовать MoneyMate.",
   },
   "kk": {
+    "Show amounts": "Сомаларды көрсету",
+    "Change avatar": "Аватарды өзгерту",
+    "Choose your avatar": "Аватарды таңдаңыз",
+    "A little more you": "Өзіңізге ұнайтын бейнені таңдаңыз",
+    "Use default avatar": "Әдепкі аватар",
+    "Cat": "Мысық",
+    "Fox": "Түлкі",
+    "Panda": "Панда",
+    "Koala": "Коала",
+    "Lion": "Арыстан",
+    "Penguin": "Пингвин",
+    "Unicorn": "Бірмүйіз",
+    "Robot": "Робот",
+    "Security & privacy": "Қауіпсіздік және құпиялық",
+    "Your finances are hidden": "Қаржы деректері жасырылды",
+    "Privacy on your terms": "Құпиялықты басқарыңыз",
+    "This is a local profile, without a password or biometric lock. Use your device lock to restrict access.":
+        "Бұл — құпиясөзсіз және биометриясыз жергілікті профиль. Кіруді шектеу үшін құрылғы құлпын пайдаланыңыз.",
+    "Hide amounts": "Сомаларды жасыру",
+    "Mask financial totals throughout the app. Entry fields and exports still show amounts.":
+        "Қосымшадағы сомаларды жасырады. Енгізу өрістерінде және экспортта сомалар көрінеді.",
+    "Cover app in background": "Фонда экранды жасыру",
+    "Show a privacy cover when the app becomes inactive. This does not block screenshots or lock the app.":
+        "Қосымша белсенді болмағанда мазмұнды жасырады. Скриншоттарды және қосымшаға кіруді бұғаттамайды.",
+    "Data stays on this device": "Деректер осы құрылғыда",
+    "No cloud sync or verified account. Local storage is not an encrypted vault. Removing the app may remove its data.":
+        "Бұлтпен синхрондау және расталған аккаунт жоқ. Жергілікті сақтау орны шифрланған сейф емес. Қосымшаны жою деректерді де жоюы мүмкін.",
+    "Export transactions": "Операцияларды экспорттау",
+    "Copies all transaction details, including amounts, to your clipboard. Profile and budget are not included. Keep the copy somewhere private.":
+        "Барлық операцияларды сомаларымен бірге алмасу буферіне көшіреді. Профиль мен бюджет кірмейді. Көшірмені қауіпсіз жерде сақтаңыз.",
+    "Copy JSON": "JSON көшіру",
+    "Transactions copied": "Операциялар көшірілді",
+    "Delete all transactions?": "Барлық операцияларды жою керек пе?",
+    "This permanently removes all transactions from this device. Your profile, settings and budgets stay. Export your transactions first if you need a copy.":
+        "Осы құрылғыдағы барлық операциялар біржола жойылады. Профиль, баптаулар және бюджеттер сақталады. Көшірме қажет болса, алдымен экспорттаңыз.",
+    "Delete all": "Барлығын жою",
+    "Transactions deleted": "Операциялар жойылды",
+    "Your data": "Сіздің деректеріңіз",
+    "Transactions on this device": "Құрылғыдағы операциялар",
+    "Copy a JSON record of your transactions": "Операциялардың JSON көшірмесі",
+    "This export is for keeping a record. Import is not supported yet.":
+        "Экспорт жазбаларды сақтауға арналған. Импорт әзірге қолдау таппайды.",
+    "Delete all transactions": "Барлық операцияларды жою",
+    "This action cannot be undone": "Бұл әрекетті қайтару мүмкін емес",
+    "Make it yours": "Өзіңіздің MoneyMate",
+    "Preferences & data": "Баптаулар мен деректер",
+    "Amount visibility and background cover":
+        "Сомаларды және фондағы экранды жасыру",
+    "Export and manage your transactions":
+        "Операцияларды экспорттау және басқару",
+    "Spending overview": "Шығындарға шолу",
     "Your money, at a glance": "Ақшаңның есебі — бір жерде",
     "Home": "Басты бет",
     "History": "Тарих",
