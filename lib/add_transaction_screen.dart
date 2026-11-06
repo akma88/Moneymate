@@ -22,7 +22,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
 
-  final List<String> _categories = [
+  String _expenseCategory = 'Food';
+  String _incomeCategory = 'Salary';
+
+  static const _incomeCategories = [
+    'Salary',
+    'Scholarship',
+    'Freelance',
+    'Business',
+    'Investments',
+    'Gift',
+    'Other',
+  ];
+
+  static const _expenseCategories = [
     'Food',
     'Shopping',
     'Transport',
@@ -32,6 +45,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Education',
     'Other',
   ];
+
+  List<String> get _categories {
+    final categories = _isIncome ? _incomeCategories : _expenseCategories;
+    // Keep older transactions editable without silently changing their category.
+    return categories.contains(_selectedCategory)
+        ? categories
+        : [...categories, _selectedCategory];
+  }
+
+  void _selectType(bool isIncome) {
+    if (_isIncome == isIncome) return;
+    setState(() {
+      if (_isIncome) {
+        _incomeCategory = _selectedCategory;
+      } else {
+        _expenseCategory = _selectedCategory;
+      }
+      _isIncome = isIncome;
+      _selectedCategory = isIncome ? _incomeCategory : _expenseCategory;
+    });
+  }
 
   @override
   void initState() {
@@ -145,7 +179,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppSettings.of(context).text('Add a new transaction'),
+                AppSettings.of(
+                  context,
+                ).text(_isIncome ? 'Income details' : 'Add a new transaction'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -154,9 +190,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               SizedBox(height: 6),
               Text(
-                AppSettings.of(
-                  context,
-                ).text('Enter the details of your transaction'),
+                AppSettings.of(context).text(
+                  _isIncome
+                      ? 'Record money you received and where it came from'
+                      : 'Enter the details of your transaction',
+                ),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -175,9 +213,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       label: Text(AppSettings.of(context).text('Expense')),
                       selected: !_isIncome,
                       onSelected: (value) {
-                        setState(() {
-                          _isIncome = false;
-                        });
+                        _selectType(false);
                       },
                     ),
                   ),
@@ -187,9 +223,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       label: Text(AppSettings.of(context).text('Income')),
                       selected: _isIncome,
                       onSelected: (value) {
-                        setState(() {
-                          _isIncome = true;
-                        });
+                        _selectType(true);
                       },
                     ),
                   ),
@@ -198,14 +232,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               SizedBox(height: 25),
               Text(
-                AppSettings.of(context).text('Title'),
+                AppSettings.of(
+                  context,
+                ).text(_isIncome ? 'Income title' : 'Title'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  hintText: AppSettings.of(context).text('Example: Lunch'),
+                  hintText: AppSettings.of(context).text(
+                    _isIncome ? 'Example: Monthly salary' : 'Example: Lunch',
+                  ),
                   prefixIcon: Icon(Icons.edit_outlined),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -229,7 +267,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               SizedBox(height: 20),
               Text(
-                AppSettings.of(context).text('Amount'),
+                AppSettings.of(
+                  context,
+                ).text(_isIncome ? 'Amount received' : 'Amount'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -272,11 +312,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               SizedBox(height: 20),
               Text(
-                AppSettings.of(context).text('Category'),
+                AppSettings.of(
+                  context,
+                ).text(_isIncome ? 'Income source' : 'Category'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               DropdownButtonFormField<String>(
+                key: ValueKey(_isIncome),
                 initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.category_outlined),
@@ -304,7 +347,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               SizedBox(height: 20),
               Text(
-                AppSettings.of(context).text('Date'),
+                AppSettings.of(
+                  context,
+                ).text(_isIncome ? 'Date received' : 'Date'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -343,7 +388,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ),
                   ),
                   child: Text(
-                    AppSettings.of(context).text('Save Transaction'),
+                    AppSettings.of(
+                      context,
+                    ).text(_isIncome ? 'Save Income' : 'Save Transaction'),
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
