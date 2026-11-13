@@ -30,6 +30,12 @@ class _MoneyMateAppState extends State<MoneyMateApp> {
   late final _user = UserModel(widget.preferences);
 
   @override
+  void initState() {
+    super.initState();
+    _user.recoverAvatarPhoto();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [

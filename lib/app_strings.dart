@@ -1,8 +1,40 @@
 // App-owned labels; stored transaction categories remain language independent.
 const appTranslations = <String, Map<String, String>>{
   "ru": {
+    "Replace transactions?": "Заменить операции?",
+    "Transactions in backup: {count}": "Операций в копии: {count}",
+    "This replaces all current transactions. Export them first if you need a copy. Profile, avatar, settings and budgets stay unchanged.":
+        "Все текущие операции будут заменены. Сначала экспортируйте их, если нужна копия. Профиль, аватар, настройки и бюджеты сохранятся.",
+    "Backup currency: {backup}. Current currency: {current}. Amounts will not be converted.":
+        "Валюта копии: {backup}. Текущая валюта: {current}. Суммы не будут конвертированы.",
+    "Replace and restore": "Заменить и восстановить",
+    "Transactions restored": "Операции восстановлены",
+    "Save the exported text somewhere safe. You can paste it here to restore transactions on another device. Profile, avatar, settings and budgets are not included.":
+        "Сохраните экспортированный текст в надёжном месте. Вставьте его здесь, чтобы восстановить операции на другом устройстве. Профиль, аватар, настройки и бюджеты в копию не входят.",
+    "Restore transactions": "Восстановить операции",
+    "Paste a MoneyMate backup": "Вставьте резервную копию MoneyMate",
+    "Backup is too large. Maximum: 5 MB and 10,000 transactions.":
+        "Копия слишком большая. Максимум: 5 МБ и 10 000 операций.",
+    "Clipboard is empty.": "Буфер обмена пуст.",
+    "Could not read clipboard. Paste the backup manually.":
+        "Не удалось прочитать буфер обмена. Вставьте копию вручную.",
+    "Invalid or unsupported MoneyMate backup. Nothing has been changed.":
+        "Копия MoneyMate повреждена или не поддерживается. Данные не изменены.",
+    "Paste the complete text created by Export transactions.":
+        "Вставьте полный текст, созданный кнопкой «Экспорт операций».",
+    "Backup text": "Текст резервной копии",
+    "Paste from clipboard": "Вставить из буфера обмена",
+    "Review backup": "Проверить копию",
+    "Choose photo": "Выбрать фото",
+    "Photo stays on this device. Centered square crop.":
+        "Фото хранится на этом устройстве. Обрезка по центру до квадрата.",
+    "Could not load photo. Please try another image.":
+        "Не удалось загрузить фото. Попробуйте другое изображение.",
+    "Photo access is unavailable. Allow access in device settings.":
+        "Нет доступа к фото. Разрешите доступ в настройках устройства.",
     "Income details": "Данные дохода",
-    "Record money you received and where it came from": "Укажите полученную сумму и источник дохода",
+    "Record money you received and where it came from":
+        "Укажите полученную сумму и источник дохода",
     "Income title": "Название дохода",
     "Amount received": "Полученная сумма",
     "Income source": "Источник дохода",
@@ -184,8 +216,40 @@ const appTranslations = <String, Map<String, String>>{
         "Создавая аккаунт, вы соглашаетесь ответственно использовать MoneyMate.",
   },
   "kk": {
+    "Replace transactions?": "Операцияларды ауыстыру керек пе?",
+    "Transactions in backup: {count}": "Көшірмедегі операциялар: {count}",
+    "This replaces all current transactions. Export them first if you need a copy. Profile, avatar, settings and budgets stay unchanged.":
+        "Барлық қазіргі операциялар ауыстырылады. Көшірмесі керек болса, алдымен экспорттаңыз. Профиль, аватар, баптаулар мен бюджеттер өзгермейді.",
+    "Backup currency: {backup}. Current currency: {current}. Amounts will not be converted.":
+        "Көшірме валютасы: {backup}. Қазіргі валюта: {current}. Сомалар айырбасталмайды.",
+    "Replace and restore": "Ауыстыру және қалпына келтіру",
+    "Transactions restored": "Операциялар қалпына келтірілді",
+    "Save the exported text somewhere safe. You can paste it here to restore transactions on another device. Profile, avatar, settings and budgets are not included.":
+        "Экспортталған мәтінді сенімді жерде сақтаңыз. Басқа құрылғыда операцияларды қалпына келтіру үшін оны осында қойыңыз. Профиль, аватар, баптаулар мен бюджеттер көшірмеге кірмейді.",
+    "Restore transactions": "Операцияларды қалпына келтіру",
+    "Paste a MoneyMate backup": "MoneyMate сақтық көшірмесін қойыңыз",
+    "Backup is too large. Maximum: 5 MB and 10,000 transactions.":
+        "Көшірме тым үлкен. Ең көбі: 5 МБ және 10 000 операция.",
+    "Clipboard is empty.": "Алмасу буфері бос.",
+    "Could not read clipboard. Paste the backup manually.":
+        "Алмасу буферін оқу мүмкін болмады. Көшірмені қолмен қойыңыз.",
+    "Invalid or unsupported MoneyMate backup. Nothing has been changed.":
+        "MoneyMate көшірмесі бүлінген немесе қолдау көрсетілмейді. Деректер өзгерген жоқ.",
+    "Paste the complete text created by Export transactions.":
+        "«Операцияларды экспорттау» арқылы жасалған толық мәтінді қойыңыз.",
+    "Backup text": "Сақтық көшірме мәтіні",
+    "Paste from clipboard": "Алмасу буферінен қою",
+    "Review backup": "Көшірмені тексеру",
+    "Choose photo": "Фото таңдау",
+    "Photo stays on this device. Centered square crop.":
+        "Фото осы құрылғыда сақталады. Ортасынан шаршы етіп қиылады.",
+    "Could not load photo. Please try another image.":
+        "Фото жүктелмеді. Басқа суретті таңдаңыз.",
+    "Photo access is unavailable. Allow access in device settings.":
+        "Фотоға қолжетімділік жоқ. Құрылғы баптауларынан рұқсат беріңіз.",
     "Income details": "Кіріс мәліметтері",
-    "Record money you received and where it came from": "Алған соманы және кіріс көзін көрсетіңіз",
+    "Record money you received and where it came from":
+        "Алған соманы және кіріс көзін көрсетіңіз",
     "Income title": "Кіріс атауы",
     "Amount received": "Алынған сома",
     "Income source": "Кіріс көзі",

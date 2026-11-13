@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../app_settings.dart';
 import '../models/user_model.dart';
@@ -31,7 +33,11 @@ class ProfileAvatar extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: _AvatarFace(avatar: user.avatar, name: user.name),
+                    child: _AvatarFace(
+                      avatar: user.avatar,
+                      name: user.name,
+                      photo: user.avatarPhoto,
+                    ),
                   ),
                   Positioned(
                     right: 0,
@@ -64,9 +70,10 @@ class ProfileAvatar extends StatelessWidget {
 }
 
 class _AvatarFace extends StatelessWidget {
-  const _AvatarFace({required this.avatar, this.name});
+  const _AvatarFace({required this.avatar, this.name, this.photo});
   final String? avatar;
   final String? name;
+  final Uint8List? photo;
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -78,6 +85,19 @@ class _AvatarFace extends StatelessWidget {
         .take(2)
         .map((part) => part.characters.first.toUpperCase())
         .join();
+    if (photo != null) {
+      return ClipOval(
+        child: Image.memory(
+          photo!,
+          width: 88,
+          height: 88,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (_, error, stack) =>
+              _AvatarFace(avatar: avatar, name: name),
+        ),
+      );
+    }
     return CircleAvatar(
       backgroundColor: colors.primaryContainer,
       child: emoji != null
@@ -110,6 +130,56 @@ class _AvatarPicker extends StatefulWidget {
 class _AvatarPickerState extends State<_AvatarPicker> {
   bool _saving = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _error = widget.user.photoRecoveryError;
+    widget.user.photoRecoveryError = null;
+  }
+
+  Future<void> _pickPhoto() async {
+    if (_saving) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      final photo = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+        requestFullMetadata: false,
+      );
+      if (photo == null) return;
+      await widget.user.setAvatarPhoto(photo);
+      if (mounted) Navigator.pop(context);
+    } on PlatformException catch (error) {
+      if (mounted) {
+        setState(() {
+          _error =
+              error.code == 'photo_access_denied' ||
+                  error.code == 'photo_access_restricted'
+              ? 'Photo access is unavailable. Allow access in device settings.'
+              : 'Could not load photo. Please try another image.';
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = 'Could not load photo. Please try another image.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
+  }
+
   Future<void> _select(String? avatar) async {
     if (_saving) return;
     setState(() {
@@ -133,72 +203,88 @@ class _AvatarPickerState extends State<_AvatarPicker> {
   Widget build(BuildContext context) {
     final s = AppSettings.of(context);
     final colors = Theme.of(context).colorScheme;
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                s.text('Choose your avatar'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                s.text('A little more you'),
-                style: TextStyle(color: colors.onSurfaceVariant),
-              ),
-              const SizedBox(height: 24),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: UserModel.avatars.keys.map((avatar) {
-                  final selected = widget.user.avatar == avatar;
-                  return Semantics(
-                    selected: selected,
-                    button: true,
-                    label: s.text(avatar),
-                    child: Tooltip(
-                      message: s.text(avatar),
-                      child: InkWell(
-                        key: ValueKey('avatar-$avatar'),
-                        onTap: _saving ? null : () => _select(avatar),
-                        borderRadius: BorderRadius.circular(24),
-                        child: ExcludeSemantics(
-                          child: Container(
-                            width: 72,
-                            height: 72,
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: selected
-                                    ? colors.primary
-                                    : Colors.transparent,
-                                width: 2,
+    return PopScope(
+      canPop: !_saving,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  s.text('Choose your avatar'),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  s.text('A little more you'),
+                  style: TextStyle(color: colors.onSurfaceVariant),
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  key: const ValueKey('choose-avatar-photo'),
+                  onPressed: _saving ? null : _pickPhoto,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: Text(s.text('Choose photo')),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  s.text('Photo stays on this device. Centered square crop.'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 24),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: UserModel.avatars.keys.map((avatar) {
+                    final selected = widget.user.avatar == avatar;
+                    return Semantics(
+                      selected: selected,
+                      button: true,
+                      label: s.text(avatar),
+                      child: Tooltip(
+                        message: s.text(avatar),
+                        child: InkWell(
+                          key: ValueKey('avatar-$avatar'),
+                          onTap: _saving ? null : () => _select(avatar),
+                          borderRadius: BorderRadius.circular(24),
+                          child: ExcludeSemantics(
+                            child: Container(
+                              width: 72,
+                              height: 72,
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: selected
+                                      ? colors.primary
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
                               ),
+                              child: _AvatarFace(avatar: avatar),
                             ),
-                            child: _AvatarFace(avatar: avatar),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              TextButton.icon(
-                key: const ValueKey('reset-avatar'),
-                onPressed: _saving ? null : () => _select(null),
-                icon: const Icon(Icons.person_outline),
-                label: Text(s.text('Use default avatar')),
-              ),
-              if (_saving) const LinearProgressIndicator(),
-              if (_error != null)
-                Text(s.text(_error!), style: TextStyle(color: colors.error)),
-            ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                TextButton.icon(
+                  key: const ValueKey('reset-avatar'),
+                  onPressed: _saving ? null : () => _select(null),
+                  icon: const Icon(Icons.person_outline),
+                  label: Text(s.text('Use default avatar')),
+                ),
+                if (_saving) const LinearProgressIndicator(),
+                if (_error != null)
+                  Text(s.text(_error!), style: TextStyle(color: colors.error)),
+              ],
+            ),
           ),
         ),
       ),

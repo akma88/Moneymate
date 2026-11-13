@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'app_settings.dart';
 import 'models/settings_model.dart';
 import 'models/transactions_model.dart';
+import 'models/transaction_backup.dart';
+import 'widgets/backup_import_dialog.dart';
 
 class DataScreen extends StatefulWidget {
   const DataScreen({super.key});
@@ -51,6 +53,67 @@ class _DataScreenState extends State<DataScreen> {
       () => Clipboard.setData(ClipboardData(text: json)),
       'Transactions copied',
     );
+  }
+
+  Future<void> _import() async {
+    final backup = await showDialog<TransactionBackup>(
+      context: context,
+      builder: (_) => const BackupImportDialog(),
+    );
+    if (backup == null || !mounted) return;
+    final s = AppSettings.of(context);
+    final currency = context.read<SettingsModel>().currency;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(s.text('Replace transactions?')),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                s
+                    .text('Transactions in backup: {count}')
+                    .replaceAll('{count}', '${backup.transactions.length}'),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                s.text(
+                  'This replaces all current transactions. Export them first if you need a copy. Profile, avatar, settings and budgets stay unchanged.',
+                ),
+              ),
+              if (currency != backup.currency) ...[
+                const SizedBox(height: 12),
+                Text(
+                  s
+                      .text(
+                        'Backup currency: {backup}. Current currency: {current}. Amounts will not be converted.',
+                      )
+                      .replaceAll('{backup}', backup.currency)
+                      .replaceAll('{current}', currency),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(s.text('Cancel')),
+          ),
+          FilledButton(
+            key: const ValueKey('confirm-restore'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(s.text('Replace and restore')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final model = context.read<TransactionsModel>();
+    await _run(() => model.restore(backup), 'Transactions restored');
   }
 
   Future<void> _clear() async {
@@ -140,7 +203,19 @@ class _DataScreenState extends State<DataScreen> {
           const SizedBox(height: 12),
           Text(
             s.text(
-              'This export is for keeping a record. Import is not supported yet.',
+              'Save the exported text somewhere safe. You can paste it here to restore transactions on another device. Profile, avatar, settings and budgets are not included.',
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('import-backup'),
+              contentPadding: const EdgeInsets.all(16),
+              leading: Icon(Icons.restore_rounded, color: colors.primary),
+              title: Text(s.text('Restore transactions')),
+              subtitle: Text(s.text('Paste a MoneyMate backup')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _busy ? null : _import,
             ),
           ),
           const SizedBox(height: 28),

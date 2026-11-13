@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'transaction.dart';
-
+import 'transaction_backup.dart';
 
 class TransactionsModel extends ChangeNotifier {
   TransactionsModel([this._preferences]) {
@@ -13,9 +13,9 @@ class TransactionsModel extends ChangeNotifier {
           Transaction.fromJson(jsonDecode(entry) as Map<String, dynamic>),
         );
       } on FormatException {
-       
+        // Skip damaged legacy entries while loading the remaining history.
       } on TypeError {
-        
+        // Skip legacy entries with invalid field types.
       }
     }
   }
@@ -30,7 +30,6 @@ class TransactionsModel extends ChangeNotifier {
   double get totalExpenses => _total(false);
   double get balance => totalIncome - totalExpenses;
 
-  
   double _total(bool isIncome) {
     double total = 0;
     for (final transaction in _transactions) {
@@ -92,6 +91,9 @@ class TransactionsModel extends ChangeNotifier {
     }
     return [..._transactions, transaction];
   });
+
+  Future<void> restore(TransactionBackup backup) =>
+      _change(() => List<Transaction>.of(backup.transactions));
 
   Future<void> clear() => _change(() => <Transaction>[]);
 
